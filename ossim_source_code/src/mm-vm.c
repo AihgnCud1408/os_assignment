@@ -489,17 +489,20 @@ int inc_vma_limit(struct pcb_t *caller, int vmaid, int inc_sz, int* inc_limit_re
   int old_end = cur_vma->vm_end;
 
   /*Validate overlap of obtained region */
-  if (validate_overlap_vm_area(caller, vmaid, area->rg_start, area->rg_end) < 0)
+  if (validate_overlap_vm_area(caller, vmaid, area->rg_start, area->rg_end) < 0) {
+    inc_limit_ret = -1;
     return -1; /*Overlap and failed allocation */
-
+  }
   /* TODO: Obtain the new vm area based on vmaid */
   cur_vma->vm_end += inc_amt;
-  inc_limit_ret = 0;
 
   if (vm_map_ram(caller, area->rg_start, area->rg_end, 
-                    old_end, incnumpage , newrg) < 0)
+                    old_end, incnumpage , newrg) < 0) {
+    inc_limit_ret = -1
     return -1; /* Map the memory to MEMRAM */
+  }
 
+  inc_limit_ret = 0;
   return 0;
 
 }
