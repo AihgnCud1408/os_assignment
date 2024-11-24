@@ -180,7 +180,7 @@ int init_mm(struct mm_struct *mm, struct pcb_t *caller) {
     vma->vm_start = 0;
     vma->vm_end = 0;
     vma->sbrk = 0;
-    struct vm_rg_struct *first_rg = init_vm_rg(vma->vm_start, vma->vm_end);
+    struct vm_rg_struct *first_rg = init_vm_rg(vma->vm_start, vma->vm_end,0);
     enlist_vm_rg_node(&vma->vm_freerg_list, first_rg);
 
     vma->vm_next = NULL;
@@ -190,12 +190,14 @@ int init_mm(struct mm_struct *mm, struct pcb_t *caller) {
     return 0;
 }
 
-struct vm_rg_struct *init_vm_rg(int rg_start, int rg_end) {
+struct vm_rg_struct *init_vm_rg(int rg_start, int rg_end, int vmaid) {
     struct vm_rg_struct *rgnode = malloc(sizeof(struct vm_rg_struct));
 
     rgnode->rg_start = rg_start;
     rgnode->rg_end = rg_end;
     rgnode->rg_next = NULL;
+
+    (void)vmaid;
 
     return rgnode;
 }
