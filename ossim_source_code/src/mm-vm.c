@@ -43,7 +43,7 @@ struct vm_area_struct *get_vma_by_num(struct mm_struct *mm, int vmaid)
     return NULL;
 
   int vmait = 0;
-  
+
   while (vmait < vmaid)
   {
     if(pvma == NULL)
@@ -208,10 +208,10 @@ int pgfree_data(struct pcb_t *proc, uint32_t reg_index)
 int pg_getpage(struct mm_struct *mm, int pgn, int *fpn, struct pcb_t *caller)
 {
   uint32_t pte = mm->pgd[pgn];
- 
+
   if (!PAGING_PTE_PAGE_PRESENT(pte))
   { /* Page is not online, make it actively living */
-    int vicpgn, swpfpn; 
+    int vicpgn, swpfpn;
     int vicfpn;
     uint32_t vicpte;
 
@@ -223,7 +223,7 @@ int pg_getpage(struct mm_struct *mm, int pgn, int *fpn, struct pcb_t *caller)
     if (vicpgn == -1) return -1;
 
     vicpte = caller->mm->pgd[vicpgn];
-    vicfpn = PAGING_PTE_FPN(vicpte); 
+    vicfpn = PAGING_PTE_FPN(vicpte);
 
     /* Get free frame in MEMSWP */
     if (MEMPHY_get_freefp(caller->active_mswp, &swpfpn) != 0) return -1; // No space in swap area
@@ -287,7 +287,7 @@ int pg_setval(struct mm_struct *mm, int addr, BYTE value, struct pcb_t *caller)
   int fpn;
 
   /* Get the page to MEMRAM, swap from MEMSWAP if needed */
-  if(pg_getpage(mm, pgn, &fpn, caller) != 0) 
+  if(pg_getpage(mm, pgn, &fpn, caller) != 0)
     return -1; /* invalid page access */
 
   int phyaddr = (fpn << PAGING_ADDR_FPN_LOBIT) + off;
@@ -406,7 +406,7 @@ int free_pcb_memph(struct pcb_t *caller)
       MEMPHY_put_freefp(caller->mram, fpn);
     } else {
       fpn = PAGING_PTE_SWP(pte);
-      MEMPHY_put_freefp(caller->active_mswp, fpn);    
+      MEMPHY_put_freefp(caller->active_mswp, fpn);
     }
   }
 
@@ -478,7 +478,7 @@ int validate_overlap_vm_area(struct pcb_t *caller, int vmaid, int vmastart, int 
  *@inc_limit_ret: increment limit return
  *
  */
-int inc_vma_limit(struct pcb_t *caller, int vmaid, int inc_sz, int* inc_limit_ret)
+int inc_vma_limit(struct pcb_t *caller, int vmaid, int inc_sz, int *inc_limit_ret)
 {
   struct vm_rg_struct * newrg = malloc(sizeof(struct vm_rg_struct));
   int inc_amt = PAGING_PAGE_ALIGNSZ(inc_sz);
@@ -490,19 +490,19 @@ int inc_vma_limit(struct pcb_t *caller, int vmaid, int inc_sz, int* inc_limit_re
 
   /*Validate overlap of obtained region */
   if (validate_overlap_vm_area(caller, vmaid, area->rg_start, area->rg_end) < 0) {
-    inc_limit_ret = -1;
+    *inc_limit_ret = -1;
     return -1; /*Overlap and failed allocation */
   }
   /* TODO: Obtain the new vm area based on vmaid */
   cur_vma->vm_end += inc_amt;
 
-  if (vm_map_ram(caller, area->rg_start, area->rg_end, 
+  if (vm_map_ram(caller, area->rg_start, area->rg_end,
                     old_end, incnumpage , newrg) < 0) {
-    inc_limit_ret = -1
+    *inc_limit_ret = -1;
     return -1; /* Map the memory to MEMRAM */
   }
 
-  inc_limit_ret = 0;
+  *inc_limit_ret = 0;
   return 0;
 
 }
